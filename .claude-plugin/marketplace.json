@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "plugins": [
+    {
+      "id": "knowmine",
+      "name": "KnowMine — Personal Knowledge Base",
+      "description": "Save notes, decisions, and insights during AI conversations. Search by meaning later. Works across Claude Code, ChatGPT, and any MCP-compatible AI.",
+      "version": "1.0.0",
+      "author": "YIING99",
+      "repository": "https://github.com/YIING99/knowmine-claude-plugin",
+      "installCommand": "/plugin marketplace add github:YIING99/knowmine-claude-plugin",
+      "tags": ["knowledge-base", "memory", "productivity"],
+      "verified": false
+    }
+  ]
+}
