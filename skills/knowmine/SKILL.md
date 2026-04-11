@@ -1,21 +1,6 @@
 ---
 name: knowmine
 description: "Save notes, decisions, and insights with semantic search via MCP. Use this skill when you want to remember things across conversations, search past knowledge by meaning, save dev logs or learning notes, or carry context between AI sessions."
-version: 1.0.0
-tags:
-  - knowledge-base
-  - semantic-search
-  - mcp
-  - memory
-  - notes
-  - personal-knowledge
-  - ai-agent
-permissions:
-  - network
-env:
-  KNOWMINE_API_KEY:
-    description: "KnowMine MCP API Key (starts with km_mcp_). Get yours at https://knowmine.ai/settings/mcp"
-    required: true
 ---
 
 # KnowMine — Personal Knowledge Base for AI Agents
