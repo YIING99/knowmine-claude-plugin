@@ -7,21 +7,14 @@ KnowMine gives Claude Code a long-term memory via MCP. Everything you tell it to
 ## Quick Install
 
 ```
-# In Claude Code:
-/plugin install knowmine
-```
-
-Or from the GitHub source:
-
-```
 /plugin marketplace add github:YIING99/knowmine-claude-plugin
 ```
 
-Claude Code will prompt you to enter your KnowMine API key (get one at [knowmine.ai/settings/mcp](https://knowmine.ai/settings/mcp)). The key is stored securely in your system keychain. No manual config needed.
+Claude Code will prompt you to enter your KnowMine API key (get one at [knowmine.ai/settings/mcp](https://knowmine.ai/settings/mcp)). No manual MCP JSON config needed.
 
 ## What You Can Do
 
-### MCP Tools (always available)
+### MCP Tools
 
 | Tool | Example |
 |------|---------|
@@ -30,6 +23,8 @@ Claude Code will prompt you to enter your KnowMine API key (get one at [knowmine
 | `add_knowledge` | Save a code snippet, article, or insight |
 | `search_my_knowledge` | "Find my notes on deployment" |
 | `get_soul` | Generate your AI profile from your knowledge base |
+
+KnowMine currently exposes 16 MCP tools across knowledge CRUD, memory, Soul workflows, and growth summaries.
 
 Full MCP tool reference: [skills/knowmine/SKILL.md](skills/knowmine/SKILL.md)
 
@@ -70,6 +65,8 @@ If you prefer not to use the plugin system, add to your `.mcp.json`:
 
 - **Website**: [knowmine.ai](https://knowmine.ai)
 - **Get API key**: [knowmine.ai/settings/mcp](https://knowmine.ai/settings/mcp)
+- **Install manifest**: [knowmine.ai/openclaw-skill.json](https://knowmine.ai/openclaw-skill.json)
+- **Health check**: [knowmine.ai/api/mcp/health](https://knowmine.ai/api/mcp/health)
 - **Main repo**: [github.com/YIING99/knowmine](https://github.com/YIING99/knowmine)
 - **Issues**: [github.com/YIING99/knowmine-claude-plugin/issues](https://github.com/YIING99/knowmine-claude-plugin/issues)
 

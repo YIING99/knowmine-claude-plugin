@@ -45,7 +45,7 @@ If you prefer to configure manually, add to your `.mcp.json`:
 }
 ```
 
-## Tools (11)
+## Tools (16)
 
 ### Knowledge CRUD
 
@@ -72,6 +72,16 @@ If you prefer to configure manually, add to your `.mcp.json`:
 |------|-------------|
 | `get_soul` | Generate a user profile summary based on your knowledge. Exportable as a system prompt. |
 | `get_insight` | Analyze your knowledge for patterns — frequent topics, recurring themes. |
+| `get_growth_summary` | Summarize knowledge growth, active folders, tags, and clusters. |
+
+### Soul Workflow
+
+| Tool | What it does |
+|------|-------------|
+| `generate_soul` | Generate or refresh a draft Soul profile from your knowledge and memories. |
+| `commit_soul` | Apply a previously generated Soul draft after confirmation. |
+| `import_soul_context` | Import external memory text, such as CLAUDE.md or ChatGPT memory exports, into Soul signals. |
+| `observe_user_trait` | Record a stable user trait observation as a pending Soul signal. |
 
 ## Example Usage
 
@@ -99,7 +109,8 @@ search_my_knowledge: "deployment strategies"
 - **Protocol**: MCP over Streamable HTTP
 - **Auth**: API key via Bearer token
 - **Data isolation**: Each API key maps to one user account
-- **Network**: All requests go to `knowmine.ai` only (no third-party data sharing)
+- **Network**: Client requests go to `knowmine.ai` over HTTPS
+- **Data processing**: KnowMine may use managed providers such as OpenAI for embeddings and AI analysis on the backend
 - **Rate limit**: 60 requests/minute
 
 ## Source Code
@@ -107,6 +118,7 @@ search_my_knowledge: "deployment strategies"
 - GitHub: [github.com/YIING99/knowmine](https://github.com/YIING99/knowmine)
 - Plugin: [github.com/YIING99/knowmine-claude-plugin](https://github.com/YIING99/knowmine-claude-plugin)
 - Website: [knowmine.ai](https://knowmine.ai)
+- Install manifest: [knowmine.ai/openclaw-skill.json](https://knowmine.ai/openclaw-skill.json)
 - Health check: [knowmine.ai/api/mcp/health](https://knowmine.ai/api/mcp/health)
 
 ---
