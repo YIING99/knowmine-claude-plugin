@@ -1,6 +1,6 @@
 ---
 name: conversation-distill
-description: "At the natural end of a conversation, proactively suggest a structured wrap-up (distill): scan the full session, classify outputs into 6 categories (insights/decisions/facts/self-observations/action-items/open-questions), get explicit user confirmation, then batch-write to KnowMine via MCP. Trigger when: (1) user says closing phrases like 'that's all', 'got it', 'thanks', 'wrap up'; (2) 3+ consecutive turns with no new topics; (3) user explicitly says 'distill', 'wrap up', 'save this session', '收尾', '沉淀'. Do NOT trigger for: single-turn Q&A, casual chat, pure coding/debugging with no knowledge output, when user is already actively writing to KnowMine."
+description: "At the natural end of a meaningful conversation, show a one-line soft reminder asking the user if they want to distill — do NOT auto-start. Only ask when the conversation has distillation value (decisions, insights, lessons, open questions, action items). If user says yes, run the full 5-step classify→confirm→write flow. Trigger reminder when: (1) user says closing phrases like 'that's all', 'thanks', 'done', '好的就这样', '没了', '谢谢'; (2) 3+ turns with no new topics AND conversation had substantive content. Do NOT remind for: casual chat, pure Q&A, pure coding/debugging with no decisions, when user already wrote to KnowMine this session."
 ---
 
 # Conversation Distill (KnowMine Edition)
@@ -25,8 +25,52 @@ Real-time capture handles individual highlights. This skill is the closing ritua
 - Quick single-turn queries
 - Casual conversation or emotional support
 - Pure coding/debugging/execution tasks with no knowledge output
-- When user is already actively calling KnowMine write tools
+- When user is already actively calling KnowMine write tools this session
 - When user says "don't save" or "skip it"
+
+---
+
+## Soft Ask Pattern（先问再做）
+
+检测到结束信号后，**先问一句，不要直接启动 5 步流程**。
+
+### 触发判断（两个条件同时满足才提醒）
+
+**条件 A — 结束信号**（满足其一）：
+- 用户说：「谢谢」「好的就这样」「搞定了」「完成了」「没了」「就这些」「thanks」「done」「that's all」「good」
+- 连续 3 轮以上无新话题，对话自然收尾
+
+**条件 B — 对话有实质内容**（满足其一）：
+- 出现了决策或方案选择
+- 讨论了架构、设计、策略
+- 产生了值得复用的经验教训或踩坑记录
+- 有未记录的 TODO 或开放问题
+
+> 两个条件缺一不可。纯闲聊说「谢谢」不提醒；有实质内容但对话还在进行中不提醒。
+
+### 提醒前：做一次轻量预扫描
+
+出提醒之前，先扫描对话，找出「最有代表性的一条」作为预告。预告要具体——不是「有内容」，而是「有决策 / 有踩坑 / 有 TODO」加一句简短描述。
+
+### 提醒话术（带具体预告）
+
+中文对话：
+> 💾 这次对话有 {N} 条值得沉淀的内容（比如{最代表性的一条，10字内}...）。要收尾整理吗？（说「要」开始，「不用」跳过）
+
+英文对话：
+> 💾 Found {N} things worth saving from this conversation ({one-line preview, e.g. "the decision about X"}...). Quick distill? (say "yes" to start, "skip" to pass)
+
+**示例：**
+- ✅ `💾 这次对话有 3 条值得沉淀的内容（比如你那个关于 MCP 权限分级的设计决策...）。要收尾整理吗？`
+- ❌ `💾 这次对话有些值得沉淀的内容，要收尾整理一下吗？`（太泛，不体现理解）
+
+### 用户响应规则
+
+| 用户回复 | Claude 行为 |
+|---------|------------|
+| 「要」「好」「是」「收尾」「沉淀」「distill」「yes」「go」「start」 | 立即启动完整 5 步流程 |
+| 「不用」「算了」「跳过」「skip」「no」「nope」「pass」 | 一句「好的，跳过。」然后停止，**本次对话不再重复提醒** |
+| 用户无回应，直接继续新话题 | **不视为永久跳过**——下次出现结束信号时，可以再提醒一次 |
 
 ---
 
