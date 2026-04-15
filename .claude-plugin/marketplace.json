@@ -1,16 +1,20 @@
 {
-  "version": "1.0",
+  "name": "knowmine-marketplace",
+  "owner": {
+    "name": "YIING99",
+    "email": "king@knowmine.ai"
+  },
+  "metadata": {
+    "description": "KnowMine — Personal knowledge base with semantic search for AI agents",
+    "version": "1.0.0"
+  },
   "plugins": [
     {
-      "id": "knowmine",
-      "name": "KnowMine — Personal Knowledge Base",
+      "name": "knowmine",
       "description": "Save notes, decisions, and insights during AI conversations. Search by meaning later. Works across Claude Code, ChatGPT, and any MCP-compatible AI.",
-      "version": "1.0.0",
-      "author": "YIING99",
-      "repository": "https://github.com/YIING99/knowmine-claude-plugin",
-      "installCommand": "/plugin marketplace add github:YIING99/knowmine-claude-plugin",
-      "tags": ["knowledge-base", "memory", "productivity"],
-      "verified": false
+      "source": "./",
+      "homepage": "https://knowmine.ai",
+      "version": "1.5.0"
     }
   ]
 }

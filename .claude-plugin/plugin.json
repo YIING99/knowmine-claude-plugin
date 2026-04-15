@@ -12,7 +12,9 @@
   "keywords": ["knowledge-base", "memory", "semantic-search", "mcp", "notes", "productivity"],
   "userConfig": {
     "KNOWMINE_API_KEY": {
+      "title": "KnowMine API Key",
       "description": "Your KnowMine MCP API key (starts with km_mcp_). Get it at https://knowmine.ai/settings/mcp",
+      "type": "string",
       "sensitive": true
     }
   },

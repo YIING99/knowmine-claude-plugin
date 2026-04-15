@@ -17,15 +17,17 @@ Sign up at [knowmine.ai](https://knowmine.ai), go to Settings → MCP, and copy 
 
 ### 2. Install via Claude Code Plugin
 
-```bash
-# Set your API key first
-export KNOWMINE_API_KEY=km_mcp_your_key_here
+Run in your terminal (NOT as a slash command in Claude):
 
-# Install the plugin (registers MCP server automatically)
-/plugin marketplace add github:YIING99/knowmine-claude-plugin
+```bash
+# Register this repo as a marketplace
+claude plugin marketplace add YIING99/knowmine-claude-plugin
+
+# Install the plugin at user scope (global)
+claude plugin install knowmine
 ```
 
-The plugin auto-registers the KnowMine MCP server — no manual config needed.
+After install, restart your Claude Code session. On first load the plugin prompts you for your `KNOWMINE_API_KEY` and stores it in your system keychain — no environment variables or manual MCP JSON needed.
 
 ### 3. Manual MCP setup (alternative)
 

@@ -6,11 +6,17 @@ KnowMine gives Claude Code a long-term memory via MCP. Everything you tell it to
 
 ## Quick Install
 
-```
-/plugin marketplace add github:YIING99/knowmine-claude-plugin
+Run in your terminal:
+
+```bash
+# 1. Register this repo as a marketplace
+claude plugin marketplace add YIING99/knowmine-claude-plugin
+
+# 2. Install the plugin (user scope = global)
+claude plugin install knowmine
 ```
 
-Claude Code will prompt you to enter your KnowMine API key (get one at [knowmine.ai/settings/mcp](https://knowmine.ai/settings/mcp)). No manual MCP JSON config needed.
+Restart your Claude Code session after install. Claude Code will prompt you to enter your KnowMine API key (get one at [knowmine.ai/settings/mcp](https://knowmine.ai/settings/mcp)) — it's stored in your system keychain, no manual MCP JSON config needed.
 
 ## What You Can Do
 
