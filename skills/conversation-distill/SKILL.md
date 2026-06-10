@@ -1,6 +1,6 @@
 ---
 name: conversation-distill
-description: "At the natural end of a meaningful conversation, show a one-line soft reminder asking the user if they want to distill — do NOT auto-start. Only ask when the conversation has distillation value (decisions, insights, lessons, open questions, action items). If user says yes, run the full 5-step classify→confirm→write flow. Trigger reminder when: (1) user says closing phrases like 'that's all', 'thanks', 'done', '好的就这样', '没了', '谢谢'; (2) 3+ turns with no new topics AND conversation had substantive content. Do NOT remind for: casual chat, pure Q&A, pure coding/debugging with no decisions, when user already wrote to KnowMine this session."
+description: "At the natural end of a meaningful conversation, show a one-line soft reminder asking the user if they want to distill — do NOT auto-start. Only ask when the conversation has distillation value (decisions, insights, judgments, lessons, open questions, action items). If user says yes, run the full 5-step classify→confirm→write flow. Trigger reminder when: (1) user says closing phrases like 'that's all', 'thanks', 'done', '好的就这样', '没了', '谢谢'; (2) 3+ turns with no new topics AND conversation had substantive content. Do NOT remind for: casual chat, pure Q&A, pure coding/debugging with no decisions, when user already wrote to KnowMine this session."
 ---
 
 # Conversation Distill (KnowMine Edition)
@@ -76,18 +76,38 @@ Real-time capture handles individual highlights. This skill is the closing ritua
 
 ## Five-Step Flow
 
-### Step 1: Full Scan — 6-Category Classification
+### Step 1: Full Scan — 7-Category Classification
 
 Scan the entire conversation. Classify everything with distillation value. **Skip any empty category — don't force it.**
 
 | Category | KnowMine Tool | Tagging Rule |
 |----------|--------------|--------------|
 | 💡 **Insights / Conclusions** | `add_knowledge` | type: `insight`; bilingual tags |
+| 🧭 **Judgments (falsifiable claims)** | `add_knowledge` | type: `insight`; title prefix `[Judgment]`; tags `judgment` + `judgment:open`; body uses Judgment Card format below |
 | 🎯 **Decisions** | `add_knowledge` | type: `note`; title prefix `[Decision Log]` |
 | 📊 **Facts / Data** | `add_knowledge` | type: `reference`; stable: ✅, time-sensitive: 🕒 + date |
 | 🪞 **Observations about the user** | `observe_user_trait` or `save_memory` | Use `save_memory` for preferences/habits; `observe_user_trait` for inferred traits |
 | ✅ **Action items / TODOs** | `add_knowledge` | type: `note`; tag `todo:open`; NO new folder — use tag |
 | ❓ **Open questions** | `add_knowledge` | type: `note`; tag `open-question` |
+
+#### Judgment Card（判断卡）
+
+**Judgment vs Insight**: an insight explains what was learned (backward-looking). A judgment is a falsifiable claim — about what something is, what causes what, or what will happen — that can later be proven right or wrong. **If it can't be wrong, it's not a judgment.** Vague opinions ("X is important") stay out.
+
+Body format:
+
+```
+判断：{one falsifiable sentence}
+链条：是什么 → 什么原因 → 导致什么结果 → 为什么
+依据：L{1-5} + 具体来源（L1 实测/观测行为 > L2 配置 > L3 官方文档 > L4 第三方数据 > L5 描述/话术）
+状态：未验证 ｜ 回看日期：YYYY-MM
+```
+
+Lifecycle (reuses existing KnowMine infrastructure — no new mechanics):
+
+- New judgments start `判断:未验证` with tag `judgment:open` and a review date (default: +3 months)
+- Verified later → `update_knowledge` the entry (revision history keeps the old state); swap tag to `judgment:verified` or `judgment:refuted`
+- A new judgment overturning an old one → write a **new** entry, link via `add_knowledge_link` type `refutes` (or `evolved_from` for refinement). Never delete the old one — the refutation chain is the asset.
 
 ### Step 2: Relationship Mapping
 
@@ -110,12 +130,15 @@ This conversation produced N items worth saving to KnowMine:
   1. {title} → add_knowledge [insight]
   2. {title} → add_knowledge [insight]
 
+🧭 Judgments (1)
+  3. [Judgment] {title}（依据 L{n}，回看 {YYYY-MM}） → add_knowledge [insight] #judgment:open
+
 🎯 Decisions (1)
-  3. [Decision Log] {title} → add_knowledge [note]
+  4. [Decision Log] {title} → add_knowledge [note]
 
 ✅ Action items (2)
-  4. {title} → add_knowledge [note] #todo:open
   5. {title} → add_knowledge [note] #todo:open
+  6. {title} → add_knowledge [note] #todo:open
 
 Tell me:
 - Numbers to remove
@@ -131,10 +154,11 @@ Tell me:
 After confirmation, write entries sequentially. Report back the KnowMine ID for each success. List failures separately — user decides: retry / rewrite / skip.
 
 **Tool mapping:**
-- Insights, decisions, facts, action items, open questions → `add_knowledge`
+- Insights, judgments, decisions, facts, action items, open questions → `add_knowledge`
+- Judgments that refute/refine an existing entry → also call `add_knowledge_link` (`refutes` / `evolved_from`) after writing
 - User preferences, habits, self-observations → `save_memory` (type: `preference`) or `observe_user_trait`
 
-**Title format:** `[Decision Log] {title}` for decisions; plain title for everything else.
+**Title format:** `[Decision Log] {title}` for decisions; `[Judgment] {title}` for judgments; plain title for everything else.
 
 **Tags:** always include at least one English tag. Add native language tag if the content is in another language.
 
@@ -154,6 +178,7 @@ Output anything not worth saving as plain Markdown:
 ## Key Principles
 
 - **Granular over hub** — one insight per entry beats one long summary
+- **Falsifiable or it's not a judgment** — judgments must be checkable; refuted judgments are kept and linked, never deleted
 - **Confirm before write** — mandatory, no exceptions
 - **Tags over folders for TODOs** — `todo:open` tag, not a new folder
 - **Bilingual tags** — EN + native language improves cross-language recall
@@ -164,6 +189,8 @@ Output anything not worth saving as plain Markdown:
 ## Self-Check Before Step 3
 
 - [ ] Any empty categories removed?
+- [ ] Every judgment falsifiable, with evidence level (L1-L5) + review date? Anything that can't be wrong demoted to insight or dropped?
+- [ ] Judgments that overturn existing entries flagged for `refutes` linking?
 - [ ] Every decision has `[Decision Log]` prefix?
 - [ ] Time-sensitive data marked 🕒 + date?
 - [ ] Action items tagged `todo:open`, not put in a new folder?
