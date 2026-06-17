@@ -1,207 +1,175 @@
 ---
 name: conversation-distill
-description: "At the natural end of a meaningful conversation, show a one-line soft reminder asking the user if they want to distill — do NOT auto-start. Only ask when the conversation has distillation value (decisions, insights, judgments, lessons, open questions, action items). If user says yes, run the full 5-step classify→confirm→write flow. Trigger reminder when: (1) user says closing phrases like 'that's all', 'thanks', 'done', '好的就这样', '没了', '谢谢'; (2) 3+ turns with no new topics AND conversation had substantive content. Do NOT remind for: casual chat, pure Q&A, pure coding/debugging with no decisions, when user already wrote to KnowMine this session."
+description: "Use when a user asks to distill/save a conversation to KnowMine, says 沉淀/收尾/归档本次对话, or a meaningful conversation naturally ends with reusable decisions, insights, lessons, module patterns, business judgment, open questions, or durable preferences. Do not use for routine execution logs, raw transcripts, IDs, tool output, local handoff details, or content already preserved in project docs."
 ---
 
 # Conversation Distill (KnowMine Edition)
 
-> The biggest waste of a conversation isn't that nothing was saved — it's that **valuable insights are buried in the process and never revisited**.
->
-> This skill closes every meaningful conversation with one explicit action: **classify → confirm → write to KnowMine**.
+Conversation distillation is not a transcript summary and not a category sorter. Its job is to preserve the small amount of knowledge that will make a future conversation smarter.
 
-## When to Use
+Default stance: fewer, sharper notes. If an item will not help future decisions, reuse, diagnosis, product/module design, or user understanding, leave it out.
 
-**The core problem**: real-time capture ≠ session-level distillation.
+## Mode Routing
 
-Real-time capture handles individual highlights. This skill is the closing ritual — a full scan of the session to see what was produced, map relationships, and catch what slipped through.
+### Soft Reminder Mode
 
-**Trigger when:**
-- User says a closing phrase: "that's all", "got it", "thanks", "done for now", "wrap up", "收尾", "好的就这样"
-- 3+ consecutive turns with no new topics
-- User switches to an unrelated topic; previous topic had substantive output not yet saved
-- User explicitly invokes: "distill", "save this session", "wrap up", "沉淀一下", `/knowmine:conversation-distill`
+Use this only at a natural ending, and only when both conditions are true:
 
-**Do NOT trigger for:**
-- Quick single-turn queries
-- Casual conversation or emotional support
-- Pure coding/debugging/execution tasks with no knowledge output
-- When user is already actively calling KnowMine write tools this session
-- When user says "don't save" or "skip it"
+- Ending signal: "谢谢", "好的就这样", "搞定了", "完成了", "没了", "done", "that's all", topic closed, or 3+ turns with no new topic.
+- Reuse signal: the conversation produced a decision, durable insight, reusable workflow, non-obvious pitfall, module pattern, business judgment, open question, or stable user preference.
 
----
+Ask one line. Do not start distilling yet.
 
-## Soft Ask Pattern（先问再做）
+Chinese:
+> 这次有 {N} 条可能值得沉淀的内容（比如{10字内具体预告}）。要我收成可复用笔记吗？
 
-检测到结束信号后，**先问一句，不要直接启动 5 步流程**。
+English:
+> Found {N} potentially reusable takeaways from this conversation ({short preview}). Distill them?
 
-### 触发判断（两个条件同时满足才提醒）
+If the user says skip/no/不用, acknowledge once and do not remind again in this conversation.
 
-**条件 A — 结束信号**（满足其一）：
-- 用户说：「谢谢」「好的就这样」「搞定了」「完成了」「没了」「就这些」「thanks」「done」「that's all」「good」
-- 连续 3 轮以上无新话题，对话自然收尾
+### Explicit Distill Mode
 
-**条件 B — 对话有实质内容**（满足其一）：
-- 出现了决策或方案选择
-- 讨论了架构、设计、策略
-- 产生了值得复用的经验教训或踩坑记录
-- 有未记录的 TODO 或开放问题
+If the user says "沉淀", "收尾整理", "写入 KnowMine", "distill this session", or equivalent, start the value-first flow immediately. Still do not write until the user explicitly confirms.
 
-> 两个条件缺一不可。纯闲聊说「谢谢」不提醒；有实质内容但对话还在进行中不提醒。
+## Value-First Flow
 
-### 提醒前：做一次轻量预扫描
+### Step 1: Reuse-Value Gate
 
-出提醒之前，先扫描对话，找出「最有代表性的一条」作为预告。预告要具体——不是「有内容」，而是「有决策 / 有踩坑 / 有 TODO」加一句简短描述。
+Scan the conversation and keep an item only if it passes at least one gate:
 
-### 提醒话术（带具体预告）
+| Gate | Keep if the item captures... |
+|---|---|
+| Module pattern | A reusable product/business/process module, design pattern, operating model, or decision logic |
+| Durable insight | A lesson, mental model, causality, tradeoff, or principle likely useful in other work |
+| Business judgment | Evidence chain + judgment + action + result/feedback, especially customer follow-up, quote, negotiation, or management decisions |
+| Stable preference | A user preference or working style that should change future agent behavior |
+| Non-obvious pitfall | A failure mode, gotcha, boundary, or correction that prevents repeated mistakes |
+| Future lever | An unresolved strategic question or action that materially affects future work |
 
-中文对话：
-> 💾 这次对话有 {N} 条值得沉淀的内容（比如{最代表性的一条，10字内}...）。要收尾整理吗？（说「要」开始，「不用」跳过）
+Reject items whose main value is local bookkeeping:
 
-英文对话：
-> 💾 Found {N} things worth saving from this conversation ({one-line preview, e.g. "the decision about X"}...). Quick distill? (say "yes" to start, "skip" to pass)
+- Raw transcript summaries or "what happened in this chat"
+- Exact IDs, table names, tokens, local paths, file lists, command lists, tool output, status receipts
+- TODOs already preserved in a handoff doc, PR, README, issue, changelog, or project-local file
+- One-off implementation facts that future agents can read from code or docs
+- Obvious restatements of the user's request
+- Sensitive customer/business details unless the user explicitly asks to persist them remotely
 
-**示例：**
-- ✅ `💾 这次对话有 3 条值得沉淀的内容（比如你那个关于 MCP 权限分级的设计决策...）。要收尾整理吗？`
-- ❌ `💾 这次对话有些值得沉淀的内容，要收尾整理一下吗？`（太泛，不体现理解）
+If the conversation is mostly routine execution and nothing passes the gate, say so and recommend no KnowMine write.
 
-### 用户响应规则
+### Step 2: Distill Into 2-5 Candidates
 
-| 用户回复 | Claude 行为 |
-|---------|------------|
-| 「要」「好」「是」「收尾」「沉淀」「distill」「yes」「go」「start」 | 立即启动完整 5 步流程 |
-| 「不用」「算了」「跳过」「skip」「no」「nope」「pass」 | 一句「好的，跳过。」然后停止，**本次对话不再重复提醒** |
-| 用户无回应，直接继续新话题 | **不视为永久跳过**——下次出现结束信号时，可以再提醒一次 |
+Prefer 2-5 high-signal candidates over exhaustive lists. Each candidate should be a reusable note, not a category label.
 
----
-
-## Five-Step Flow
-
-### Step 1: Full Scan — 7-Category Classification
-
-Scan the entire conversation. Classify everything with distillation value. **Skip any empty category — don't force it.**
-
-| Category | KnowMine Tool | Tagging Rule |
-|----------|--------------|--------------|
-| 💡 **Insights / Conclusions** | `add_knowledge` | type: `insight`; bilingual tags |
-| 🧭 **Judgments (falsifiable claims)** | `add_knowledge` | type: `insight`; title prefix `[Judgment]`; tags `judgment` + `judgment:open`; body uses Judgment Card format below |
-| 🎯 **Decisions** | `add_knowledge` | type: `note`; title prefix `[Decision Log]` |
-| 📊 **Facts / Data** | `add_knowledge` | type: `reference`; stable: ✅, time-sensitive: 🕒 + date |
-| 🪞 **Observations about the user** | `observe_user_trait` or `save_memory` | Use `save_memory` for preferences/habits; `observe_user_trait` for inferred traits |
-| ✅ **Action items / TODOs** | `add_knowledge` | type: `note`; tag `todo:open`; NO new folder — use tag |
-| ❓ **Open questions** | `add_knowledge` | type: `note`; tag `open-question` |
-
-#### Judgment Card（判断卡）
-
-**Judgment vs Insight**: an insight explains what was learned (backward-looking). A judgment is a falsifiable claim — about what something is, what causes what, or what will happen — that can later be proven right or wrong. **If it can't be wrong, it's not a judgment.** Vague opinions ("X is important") stay out.
-
-Body format:
-
-```
-判断：{one falsifiable sentence}
-链条：是什么 → 什么原因 → 导致什么结果 → 为什么
-依据：L{1-5} + 具体来源（L1 实测/观测行为 > L2 配置 > L3 官方文档 > L4 第三方数据 > L5 描述/话术）
-状态：未验证 ｜ 回看日期：YYYY-MM
-```
-
-Lifecycle (reuses existing KnowMine infrastructure — no new mechanics):
-
-- New judgments start `判断:未验证` with tag `judgment:open` and a review date (default: +3 months)
-- Verified later → `update_knowledge` the entry (revision history keeps the old state); swap tag to `judgment:verified` or `judgment:refuted`
-- A new judgment overturning an old one → write a **new** entry, link via `add_knowledge_link` type `refutes` (or `evolved_from` for refinement). Never delete the old one — the refutation chain is the asset.
-
-### Step 2: Relationship Mapping
-
-Find connections. Default to **granular over aggregated**:
-
-- Same decision, different angles → separate entries, cross-reference in body
-- A is prerequisite for B → mention A's title/ID in B's body
-- Insight came from a fact → note the source
-
-**Do not** merge into one hub document. Granular entries have higher vector search precision.
-
-### Step 3: User Confirmation (Mandatory)
-
-Present the list:
-
-```
-This conversation produced N items worth saving to KnowMine:
-
-💡 Insights (2)
-  1. {title} → add_knowledge [insight]
-  2. {title} → add_knowledge [insight]
-
-🧭 Judgments (1)
-  3. [Judgment] {title}（依据 L{n}，回看 {YYYY-MM}） → add_knowledge [insight] #judgment:open
-
-🎯 Decisions (1)
-  4. [Decision Log] {title} → add_knowledge [note]
-
-✅ Action items (2)
-  5. {title} → add_knowledge [note] #todo:open
-  6. {title} → add_knowledge [note] #todo:open
-
-Tell me:
-- Numbers to remove
-- Numbers to edit (number + new version)
-- Numbers to merge
-- Say "write" when ready
-```
-
-**Iron rule: do not call any KnowMine tool until the user explicitly says "write" or equivalent.**
-
-### Step 4: Batch Write to KnowMine
-
-After confirmation, write entries sequentially. Report back the KnowMine ID for each success. List failures separately — user decides: retry / rewrite / skip.
-
-**Tool mapping:**
-- Insights, judgments, decisions, facts, action items, open questions → `add_knowledge`
-- Judgments that refute/refine an existing entry → also call `add_knowledge_link` (`refutes` / `evolved_from`) after writing
-- User preferences, habits, self-observations → `save_memory` (type: `preference`) or `observe_user_trait`
-
-**Title format:** `[Decision Log] {title}` for decisions; `[Judgment] {title}` for judgments; plain title for everything else.
-
-**Tags:** always include at least one English tag. Add native language tag if the content is in another language.
-
-### Step 5: Surface Leftovers
-
-Output anything not worth saving as plain Markdown:
+Use this compact shape:
 
 ```markdown
-## Leftovers (not saved)
+我建议只沉淀这 {N} 条：
 
-- [rough idea or reminder]
-- [something to try next time]
+1. {type} - 《{title}》
+   以后价值：{why this is reusable}
+   内容：{3-6 bullets or one tight paragraph}
+   建议写入：{KnowMine add_knowledge/save_memory/observe_user_trait/local only}
+
+不写入的内容：{briefly name excluded bookkeeping items}
+
+回「写入」我再保存；要删/改/合并也可以直接说编号。
 ```
 
----
+Types are descriptive, not mandatory buckets:
 
-## Key Principles
+- `洞察`
+- `决策`
+- `模块信息`
+- `判断卡`
+- `偏好`
+- `踩坑/边界`
+- `开放问题`
 
-- **Granular over hub** — one insight per entry beats one long summary
-- **Falsifiable or it's not a judgment** — judgments must be checkable; refuted judgments are kept and linked, never deleted
-- **Confirm before write** — mandatory, no exceptions
-- **Tags over folders for TODOs** — `todo:open` tag, not a new folder
-- **Bilingual tags** — EN + native language improves cross-language recall
-- **Time-sensitivity** — flag stale-prone data with 🕒 + date
+Do not force empty types. Do not reproduce the old six-category checklist unless the user explicitly asks for a full audit.
 
----
+For `判断卡`, use it only when there is a falsifiable business judgment, not a vague opinion. Keep the card compact:
 
-## Self-Check Before Step 3
+```markdown
+判断：{one falsifiable sentence}
+依据：{source/evidence chain, with uncertainty if needed}
+因果链：{why this should lead to that result}
+行动/结果：{what was done or what feedback will verify it}
+可复用经验：{what future work should remember}
+状态：未验证 / 已验证 / 已推翻
+```
 
-- [ ] Any empty categories removed?
-- [ ] Every judgment falsifiable, with evidence level (L1-L5) + review date? Anything that can't be wrong demoted to insight or dropped?
-- [ ] Judgments that overturn existing entries flagged for `refutes` linking?
-- [ ] Every decision has `[Decision Log]` prefix?
-- [ ] Time-sensitive data marked 🕒 + date?
-- [ ] Action items tagged `todo:open`, not put in a new folder?
-- [ ] Any "fake hub" entries that should be split?
+### Step 3: Relationship Mapping
 
----
+Add relationship notes only when they improve future retrieval:
+
+- `extends`: this note extends a known background package, decision, or prior KnowMine entry.
+- `evolved_from`: this updates or corrects an older decision.
+- `source`: point to the local project doc or handoff file when detailed evidence belongs there.
+
+Do not create a hub note merely to connect everything. Semantic search works better with small, standalone reusable notes.
+
+### Step 4: User Confirmation
+
+Before any write, ask for confirmation. The user can remove, edit, merge, or approve candidates.
+
+Accept confirmations such as "写入", "全部写", "OK 存", "save", "write".
+
+Iron rule: do not call KnowMine write tools before explicit confirmation.
+
+### Step 5: Write and Verify
+
+When confirmed:
+
+1. Route the target correctly:
+   - Reusable cross-project knowledge -> KnowMine `add_knowledge`
+   - Stable user preference -> `save_memory` or `observe_user_trait`
+   - Project-specific evidence -> local project docs, not KnowMine, unless explicitly requested
+2. Search/list first if duplicate risk is obvious.
+3. Write sequentially.
+4. Report each saved ID.
+5. Verify with read/search when available. If verification fails, report the uncertainty instead of claiming completion.
+
+## Special Guidance For Business / Module Conversations
+
+When the conversation involves sales ops, customer management, Feishu/CRM modules, quote workflows, or team operating systems, the valuable layer is usually the reusable module logic:
+
+- What operating model emerged?
+- What design principle or management insight will transfer to future projects?
+- What old decision changed and why?
+- Which constraints are guardrails, not mere implementation detail?
+- What should a future agent remember before designing a similar module?
+
+Exclude project ledger details unless they are the actual reusable lesson. For example, a Base ID or CLI subcommand belongs in a handoff doc; "thin follow-up log + commander dashboard + hidden scoring as an operating pattern" may belong in KnowMine.
+
+## Real Failure To Avoid
+
+Bad distillation shape:
+
+- 10 items across insights / decisions / facts / user observation / TODO / open question
+- Includes Base/Table IDs, command availability, next script TODO, and other handoff material
+- Explains where each item should be filed, but not why it matters later
+
+Better shape:
+
+- 2-3 reusable candidates
+- Each candidate is a module insight, decision logic, judgment card, or durable preference
+- Local evidence and TODOs stay in the handoff doc
+- User confirms before write
+
+## Self-Check Before Showing Candidates
+
+- [ ] Does every candidate have an explicit "以后价值" reason?
+- [ ] Did I remove project ledger details that already live in local docs?
+- [ ] Is the list short enough that the user can approve it quickly?
+- [ ] Am I preserving reusable insight rather than summarizing the chat?
+- [ ] Am I waiting for the user's "写入" before calling tools?
 
 ## Standalone Version
 
 This KnowMine edition is part of the [knowmine-claude-plugin](https://github.com/YIING99/knowmine-claude-plugin).
 
-A tool-agnostic version (works with any notes tool or plain Markdown output) is available separately:
+A tool-agnostic version is available separately:
 → [github.com/YIING99/conversation-distill](https://github.com/YIING99/conversation-distill)
 → `npx clawhub@latest install conversation-distill`
